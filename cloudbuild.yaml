@@ -1,0 +1,6 @@
+
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build','-t','$_IMAGE:$_VERSION','--build-arg','BRAND_CONFIG=$_BRAND','./backend']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push','$_IMAGE:$_VERSION']

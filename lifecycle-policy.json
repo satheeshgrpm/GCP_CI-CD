@@ -1,0 +1,26 @@
+[
+  {
+    "name": "keep-release",
+    "action": {
+      "type": "Keep"
+    },
+    "condition": {
+      "tagPrefixes": [
+        "v"
+      ]
+    }
+  },
+  {
+    "name": "delete-old",
+    "action": {
+      "type": "Delete"
+    },
+    "condition": {
+      "tagPrefixes": [
+        "dev-",
+        "qa-"
+      ],
+      "olderThan": "30d"
+    }
+  }
+]

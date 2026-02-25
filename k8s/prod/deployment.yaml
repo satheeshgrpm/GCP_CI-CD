@@ -1,0 +1,23 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: creativeai-prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: creativeai-prod
+  template:
+    metadata:
+      labels:
+        app: creativeai-prod
+    spec:
+      containers:
+      - name: app
+        image: IMAGE_PLACEHOLDER
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ENV
+          value: "prod"

@@ -1,0 +1,23 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: creativeai-qa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: creativeai-qa
+  template:
+    metadata:
+      labels:
+        app: creativeai-qa
+    spec:
+      containers:
+      - name: app
+        image: IMAGE_PLACEHOLDER
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ENV
+          value: "qa"

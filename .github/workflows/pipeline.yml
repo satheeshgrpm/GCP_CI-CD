@@ -1,0 +1,55 @@
+
+name: CreativeAI CI/CD
+
+on:
+  push:
+    branches: [dev, qa, main, 'tata/*', 'hyundai/*']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Detect brand
+        run: |
+          if [[ "${GITHUB_REF}" == refs/heads/tata/* ]]; then echo "BRAND=tata" >> $GITHUB_ENV;
+          elif [[ "${GITHUB_REF}" == refs/heads/hyundai/* ]]; then echo "BRAND=hyundai" >> $GITHUB_ENV;
+          else echo "BRAND=generic" >> $GITHUB_ENV; fi
+
+      - name: Auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker asia-south1-docker.pkg.dev
+
+      - name: Build & Push
+        run: |
+          IMAGE=asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/creativeai-repo/app
+          VERSION=dev-${{ github.sha }}
+          docker build --build-arg BRAND_CONFIG=$BRAND -t $IMAGE:$VERSION ./backend
+          docker push $IMAGE:$VERSION
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+  deploy-dev:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - run: sed "s|IMAGE_PLACEHOLDER|$IMAGE:$VERSION|g" k8s/dev/deployment.yaml | kubectl apply -f -
+
+  deploy-qa:
+    if: github.ref == 'refs/heads/qa'
+    runs-on: ubuntu-latest
+    environment: qa
+    steps:
+      - run: sed "s|IMAGE_PLACEHOLDER|$IMAGE:$VERSION|g" k8s/qa/deployment.yaml | kubectl apply -f -
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: sed "s|IMAGE_PLACEHOLDER|$IMAGE:$VERSION|g" k8s/prod/deployment.yaml | kubectl apply -f -
