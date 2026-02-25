@@ -15,3 +15,4 @@
 2. terraform init && terraform apply
 3. gcloud container clusters get-credentials creativeai-cluster --region asia-south1
 4. Push to dev branch to trigger CI/CD
+5. Test the remote branch
